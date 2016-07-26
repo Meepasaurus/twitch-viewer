@@ -1,4 +1,9 @@
-Twitch.tv Buddylist Viewer [WIP]
-================================
+Twitch.tv User Viewer [WIP]
+===========================
 
--need to refactor and add Gulp build process
+-includes Gulp build scripts
+
+Unminified CodePen version: http://codepen.io/Meepasaurus/full/RRryaB/
+----------------------------------------------------------------------
+
+-need to refactor
