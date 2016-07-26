@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Twitch Viewer</title>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"/>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css"/>
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic"/>
+	<link rel="stylesheet" href="index.css"/>
+</head>
+<body>
+	<main class="wrapper container-fluid">
+	  <section class="search">
+	    <div class="row">
+	      <header class="title-image text-center col-xs-12 col-sm-10 col-sm-offset-1 col-md-8 col-md-offset-2 col-lg-6 col-lg-offset-3">
+	        <img class="logo" src="https://github.com/Meepasaurus/fcc-images/blob/fee73047d448766d46311996d353261839d1c6f5/twitch-viewer/twitch_logo.png?raw=true" alt="twitch-logo"/>
+	      </header>
+	    </div>
+	  
+	    <div class="row">
+	      <div class="search-bar-container col-xs-12 col-sm-10 col-sm-offset-1 col-md-8 col-md-offset-2 col-lg-6 col-lg-offset-3">
+	        <div class="input-group searchbar">
+	          <input id="txt-search" type="text" class="form-control" placeholder="Search to add users...">
+	        </div>
+	      </div>
+	    </div>
+	  </section>
+	  
+	  <section class="search-panel-container">
+	    <div class="row">
+	      <div class="panel-container col-xs-12 col-sm-10 col-sm-offset-1 col-md-8 col-md-offset-2 col-lg-6 col-lg-offset-3">
+	        <div class="panel panel-default">
+	          <div class="panel-heading" role="tab" id="headingSearch">
+	            <h4 class="panel-title">Search Results</h4>
+	          </div>
+	          <div id="collapseSearch" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingSearch">
+	            <div class="panel-body">
+	              Test
+	            </div>
+	          </div>
+	        </div>
+	      </div>
+	    </div>
+	  </section>
+	  
+	  <div id="collapse-user-list" class="collapse in">
+	    <section class="online-container">
+	      <div class="row">
+	        <div class="panel-container col-xs-12 col-sm-10 col-sm-offset-1 col-md-8 col-md-offset-2 col-lg-6 col-lg-offset-3">
+	          <div class="panel panel-default">
+	            <a id="btn-online" role="button" data-toggle="collapse" href="#collapseOnline" aria-expanded="true" aria-controls="collapseOnline">
+	              <div class="panel-heading" role="tab" id="headingOnline">
+	                <h4 class="panel-title"><i id="caret-online" class="fa fa-caret-down fa-fw" aria-hidden="true"></i> Online</h4>
+	              </div>
+	            </a>
+	            <div id="collapseOnline" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOnline">
+	              <div id="users-online" class="panel-body">
+	              </div>
+	            </div>
+	          </div>
+	        </div>
+	      </div>
+	    </section>
+
+	    <section class="offline-container">
+	      <div class="row">
+	        <div class="panel-container col-xs-12 col-sm-10 col-sm-offset-1 col-md-8 col-md-offset-2 col-lg-6 col-lg-offset-3">
+	          <div class="panel panel-default">
+	            <a id="btn-offline" role="button" data-toggle="collapse" href="#collapseOffline" aria-expanded="true" aria-controls="collapseOffline">
+	              <div class="panel-heading" role="tab" id="headingOffline">
+	                <h4 class="panel-title"><i id="caret-offline" class="fa fa-caret-down fa-fw" aria-hidden="true"></i> Offline</h4>
+	              </div>
+	            </a>
+	            <div id="collapseOffline" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOffline">
+	              <div id="users-offline" class="panel-body">
+	              </div>
+	            </div>
+	          </div>
+	        </div>
+	      </div>
+	    </section>
+	  </div>
+	    
+	  <div class="row">
+	    <footer class="col-xs-12 col-sm-10 col-sm-offset-1 col-md-8 col-md-offset-2 col-lg-6 col-lg-offset-3">
+	    </footer>
+	  </div>
+	  
+	  <button id="btn-reset" class="btn btn-secondary">Reset Demo List</button>
+	</main>
+	<script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+	<script src="index.js"></script>
+</body>
+</html>
