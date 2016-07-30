@@ -30,6 +30,7 @@ a:hover, a:active, a:focus {
 
 h4 {
   font-weight: bold;
+  display: inline;
 }
 
 #caret-online.open, #caret-offline.open {
@@ -47,7 +48,8 @@ h4 {
 
 .logo {
   width: 100%;
-  max-width: 175px;
+  max-width: 176px;
+  height: 108px;
 }
 
 .search-bar-container {
@@ -81,12 +83,12 @@ h4 {
   .panel-heading {
     padding: 10px;
     background-color: $bg-purple;
-    //sbox-shadow: $inset-shadow;
     border-radius: 0;
     outline: 0;
     color: white;
   }
   .panel-body {
+    padding: 0 15px;
     background-color: $light-gray;
   }
 }
@@ -96,26 +98,46 @@ h4 {
   width: 100%;
   min-height: 100px;
   margin: 0;
+  padding-top: 10px;
 }
 
 .user-logo {
-  flex: 3 3 100px;
+  flex: 2 2 50px;
   max-width: 75px;
-  min-width: 50px;
+  min-width: 25px;
   img {
     width: 100%;
   }
 }
 
 .user-text {
-  flex: 1 1 300px;
-  h4 {
-    margin: 0 0 0 10px;
+  flex: 10 10 300px;
+  margin: 0 0 10px 10px;
+  p {
+    padding: 0;
+    margin: 0;
+    line-height: 1.5;
   }
 }
 
+.user-status {
+  font-style: italic;
+}
+
+.null-status {
+  font-weight: bold;
+  color: darkred;
+}
+
+.user-game {
+  color: darkgreen;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
 .user-remove {
-  flex: 3 3 100px;
+  flex: 1 1 30px;
+  margin-top: -8px;
   font-size: 28px;
   text-align: right;
 }

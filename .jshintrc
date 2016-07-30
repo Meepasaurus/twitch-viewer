@@ -1,5 +1,8 @@
 {
     "globals": {
-        "$": false
+        "$": false,
+        "localStorage": false,
+        "document": false,
+        "console": false
     }
 }
