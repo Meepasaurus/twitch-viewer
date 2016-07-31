@@ -18,9 +18,30 @@ var TwitchViewer = function(defaultList){
 
   return {
 
-    //user constructor
-    userObj: function(data){
+    createUserObj: function(newUserName){
+      var collapser = $('<div class="collapse-user collapse">'), //top-most individual user container
+          userDiv = $('<div class="user-container">');
 
+        //avatar
+        userDiv.append($('<div class="user-logo">')
+          .append($('<img>')));
+        
+        //display name - status - game
+        userDiv.append($('<div class="user-text">').append($('<h4 class="display-name"></h4><p class="user-status"></p><p class="user-game"></p>')));
+
+        //x icon for user removal
+        userDiv.append($('<div class="user-remove">').append($('<a href="#"><i class="fa fa-times-circle" aria-hidden="true"></i></a>')));
+        
+        //add to userObjs
+        collapser.append(userDiv);
+        userObjs[newUserName] = {
+          collapser: collapser,
+          logo: collapser.find('img'),
+          displayName: collapser.find('.display-name'),
+          status: collapser.find('.user-status'),
+          game: collapser.find('.user-game'),
+          isOnline: null
+        };
     },
 
     deleteUser: function(userRemoveLink){
@@ -48,7 +69,7 @@ var TwitchViewer = function(defaultList){
       location.reload();
     },
 
-    //creates and appends div to proper section
+    //updates display data appends div to proper section
     parseUserData: function(data, isOnline){
       //console.log(data);
       var collapser = $('<div class="collapse-user collapse">'), //top-most individual user container
@@ -60,49 +81,70 @@ var TwitchViewer = function(defaultList){
       if (isOnline){
         //console.log(data);
 
+        var channelLogo = data.stream.channel.logo,
+            channelName = data.stream.channel.name,
+            thisUserObj = userObjs[channelName];
+
         //avatar
-        userDiv.append($('<div class="user-logo">')
-          .append($('<img src="' + data.stream.channel.logo + '" alt="' + data.stream.channel.name + ' avatar">')));
+        thisUserObj.logo.attr({'src': channelLogo, 'alt': channelName + ' avatar'});
         
         //display name - status - game
         status = data.stream.channel.status || '';
         game = data.stream.game ? 'Streaming: ' + data.stream.game : '';
         viewers = data.stream.viewers ? data.stream.viewers + ' viewers' : 0;
 
-        userDiv.append($('<div class="user-text">').append($('<h4>' + data.stream.channel.display_name + '</h4><p class=user-status>' + status + '</p><p class=user-game>' + game + ' - ' + viewers+ '</p>')));
+        thisUserObj.displayName.text(data.stream.channel.display_name);
+        thisUserObj.status.text(status);
+        thisUserObj.game.text(game + ' - ' + viewers);
 
-        //x icon for user removal
-        userDiv.append($('<div class="user-remove">').append($('<a href="#"><i class="fa fa-times-circle" aria-hidden="true"></i></a>')));
-        $('#users-online').append(collapser.append(userDiv));
+        //append to DOM if it isn't already
+        if(thisUserObj.isOnline === null){
+          thisUserObj.isOnline = true;
+          $('#users-online').append(thisUserObj.collapser);
+          thisUserObj.collapser.collapse('show');
+        }
       } else if (isOnline === false) {
+        //console.log(data);
+
+        var channelLogo = data.logo,
+            channelName = data.name,
+            thisUserObj = userObjs[channelName];
+
         //avatar
-        userDiv.append($('<div class="user-logo">')
-          .append($('<img src="' + data.logo + '" alt="' + data.name + ' avatar">')));
+        thisUserObj.logo.attr({'src': channelLogo, 'alt': channelName + ' avatar'});
         
         //display name - status
         status = data.status || '';
 
-        userDiv.append($('<div class="user-text">').append($('<h4>' + data.display_name + '</h4><p class=user-status>' + status + '</p>')));
+        thisUserObj.displayName.text(data.display_name);
+        thisUserObj.status.text(status);        
         
-        //x icon for user removal
-        userDiv.append($('<div class="user-remove">').append($('<a href="#"><i class="fa fa-times-circle" aria-hidden="true"></i></a>')));
-        $('#users-offline').append(collapser.append(userDiv));
+        //append to DOM if it isn't already
+        if(thisUserObj.isOnline === null){
+          thisUserObj.isOnline = false;
+          $('#users-offline').append(thisUserObj.collapser);
+          thisUserObj.collapser.collapse('show');
+        }
       } else {
         //user does not currently exist
-        
-        //default avatar
-        userDiv.append($('<div class="user-logo">')
-          .append($('<img src="images/default_avatar.png" alt="default avatar">')));
-        
-        //username - null status
-        userDiv.append($('<div class="user-text">').append($('<h4>' + data + '</h4><p class="null-status">This user no longer exists.</p>')));
+        var thisUserObj = userObjs[data];
 
-        //x icon for user removal
-        userDiv.append($('<div class="user-remove">').append($('<a href="#"><i class="fa fa-times-circle" aria-hidden="true"></i></a>')));
-        $('#users-offline').append(collapser.append(userDiv));
+        //avatar
+        thisUserObj.logo.attr({'src': 'images/default_avatar.png', 'alt': 'default avatar'});
+        
+        //display name - status
+        status = data.status || '';
+
+        thisUserObj.displayName.text(data);
+        thisUserObj.status.html('<p class="null-status">This user no longer exists.</p>');        
+        
+        //append to DOM if it isn't already
+        if(thisUserObj.isOnline === null){
+          thisUserObj.isOnline = false;
+          $('#users-offline').append(thisUserObj.collapser);
+          thisUserObj.collapser.collapse('show');
         }
-      //smoothly add content to DOM
-      collapser.collapse('toggle');
+      }
     },
 
     getOfflineUser: function(channelURL){
@@ -147,6 +189,16 @@ var TwitchViewer = function(defaultList){
           }
         });
       });
+    },
+
+    init: function(){
+      var thisTwitchViewer = this;
+      
+      $.each(localUserList, function(i, username){
+        thisTwitchViewer.createUserObj(username);
+      });
+      
+      thisTwitchViewer.updateUserList();
     }
 
   };
@@ -158,7 +210,7 @@ $(document).ready(function(){
   
   var myTwitchViewer = new TwitchViewer(defaultList);
   
-  myTwitchViewer.updateUserList();
+  myTwitchViewer.init();
   
   //toggle online userlist
   $('#btn-online').on('click', function(e){
