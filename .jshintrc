@@ -3,6 +3,7 @@
         "$": false,
         "localStorage": false,
         "document": false,
-        "console": false
+        "console": false,
+        "location": false;
     }
 }

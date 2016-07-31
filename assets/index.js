@@ -1,22 +1,64 @@
 'use strict';
 
-var TwitchViewer = function(users){
+var TwitchViewer = function(defaultList){
 
-  var userList = users;
+  var localUserList = [],
+      userObjs = {};
+
+  //check for saved user list
+  if (localStorage.hasOwnProperty('userList')){
+    console.log("Found Local List");
+    localUserList = localStorage.getItem('userList').split(", ");
+    console.log(localUserList);
+  } else {
+    console.log("Initializing List");
+    localStorage.setItem('userList', defaultList);
+    localUserList = defaultList.split(", ");
+  }
 
   return {
+
+    //user constructor
+    userObj: function(data){
+
+    },
+
+    deleteUser: function(userRemoveLink){
+      var deleteUser = $(userRemoveLink).closest('.collapse-user'),
+          deleteUserName = $(userRemoveLink).closest('.user-container').find('h4').html().toLowerCase();
+
+      //remove from userList and userObjs
+      localUserList.splice(localUserList.indexOf(deleteUserName), 1);
+      delete userObjs[deleteUserName];
+
+      //update localStorage
+      localStorage.setItem('userList', localUserList.join(", "));
+      deleteUser.collapse('hide');
+      
+      //remove from DOM, note not using .on hidden.bs.collapse event because users will be hidden when moving containers between online and offline lists
+      setTimeout(function(){
+        $(deleteUser).remove();
+      }, 5000);
+
+    },
+
+    resetLocalList: function(){
+      localStorage.setItem('userList', defaultList);
+      localUserList = defaultList.split(", ");
+      location.reload();
+    },
 
     //creates and appends div to proper section
     parseUserData: function(data, isOnline){
       //console.log(data);
-      var userDiv = $('<div class="user-container">'),
-          collapser = $('<div class="collapse-user collapse">'),
+      var collapser = $('<div class="collapse-user collapse">'), //top-most individual user container
+          userDiv = $('<div class="user-container">'),
           status = '',
           game = '',
           viewers = 0;
       
       if (isOnline){
-        console.log(data);
+        //console.log(data);
 
         //avatar
         userDiv.append($('<div class="user-logo">')
@@ -81,7 +123,7 @@ var TwitchViewer = function(users){
     updateUserList: function(){
       var thisTwitchViewer = this;
       
-      $.each(userList, function(i, username){
+      $.each(localUserList, function(i, username){
         //console.log(username);
         $.ajax({
           dataType: 'jsonp',
@@ -112,20 +154,9 @@ var TwitchViewer = function(users){
 };
 
 $(document).ready(function(){
-  var defaultList = 'esl_sc2, ogamingsc2, cretetion, freecodecamp, storbeck, habathcx, robotcaleb, noobs2ninjas, brunofin, comster404',
-      userList = '';
+  var defaultList = 'esl_sc2, ogamingsc2, cretetion, freecodecamp, storbeck, habathcx, robotcaleb, noobs2ninjas, brunofin, comster404';
   
-  if (localStorage.hasOwnProperty('userList')){
-    console.log("Found Local List");
-    userList = localStorage.getItem('userList').split(", ");
-    console.log(userList);
-  } else {
-    console.log("Initializing List");
-    localStorage.setItem('userList', defaultList);
-    userList = defaultList.split(", ");
-  }
-  
-  var myTwitchViewer = new TwitchViewer(userList);
+  var myTwitchViewer = new TwitchViewer(defaultList);
   
   myTwitchViewer.updateUserList();
   
@@ -141,31 +172,15 @@ $(document).ready(function(){
     $('#caret-offline').toggleClass('open');
   });
   
-  //delete user from DOM
-  $('#collapse-user-list').on('hidden.bs.collapse', '.collapse-user', function (){
-    $(this).remove();
-  });
-  
   //remove user from list
   $('#collapse-user-list').on('click', '.user-remove>a', function(e){
     e.preventDefault();
-    var deleteUser = $(this).closest('.collapse-user');
-    deleteUser.collapse('hide');
-    //remove from userList
-    userList.splice(userList.indexOf($(this).closest('.user-container').find('h4').html()), 1);
-    //update localStorage
-    localStorage.setItem('userList', userList.join(", "));
-    //event above will fire
+    myTwitchViewer.deleteUser(this);
   });
   
   //reset to demo userlist
   $('#btn-reset').on('click', function(e){
-    console.log("Resetting List");
-    localStorage.setItem('userList', defaultList);
-    userList = defaultList.split(", ");
-    console.log(userList);
-    //todo
-    //refresh list
+    myTwitchViewer.resetLocalList();
   });
   
 });
