@@ -1,6 +1,6 @@
 'use strict';
 
-var TwitchViewer = function(defaultList){
+var TwitchViewer = function(defaultList, cooldown){
 
   var localUserList = [],
       userObjs = {};
@@ -51,20 +51,24 @@ var TwitchViewer = function(defaultList){
 
     deleteUser: function(userRemoveLink){
       var deleteUser = $(userRemoveLink).closest('.collapse-user'),
-          deleteUserName = $(userRemoveLink).closest('.user-container').find('h4').html().toLowerCase();
+          deleteUserName = $(userRemoveLink).closest('.user-container').find('h4').html().toLowerCase(),
+          deleteIndex = localUserList.indexOf(deleteUserName);
 
-      //remove from userList and userObjs
-      localUserList.splice(localUserList.indexOf(deleteUserName), 1);
-      delete userObjs[deleteUserName];
+      //prevents user clicking rapidly and removing from index -1
+      if (deleteIndex !== -1){
+        //remove from userList and userObjs
+        localUserList.splice(deleteIndex, 1);
+        delete userObjs[deleteUserName];
 
-      //update localStorage
-      localStorage.setItem('userList', localUserList.join(", "));
-      deleteUser.collapse('hide');
-      
-      //remove from DOM, note not using .on hidden.bs.collapse event because users will be hidden when moving containers between online and offline lists
-      setTimeout(function(){
-        $(deleteUser).remove();
-      }, 5000);
+        //update localStorage
+        localStorage.setItem('userList', localUserList.join(", "));
+        deleteUser.collapse('hide');
+        
+        //remove from DOM, note not using .on hidden.bs.collapse event because users will be hidden when moving containers between online and offline lists
+        setTimeout(function(){
+          $(deleteUser).remove();
+        }, 5000);
+      }
 
     },
 
@@ -169,6 +173,8 @@ var TwitchViewer = function(defaultList){
     },
 
     updateUserList: function(){
+      console.log('UPDATING...');
+
       var thisTwitchViewer = this;
       
       $.each(localUserList, function(i, username){
@@ -200,10 +206,13 @@ var TwitchViewer = function(defaultList){
     init: function(){
       var thisTwitchViewer = this;
       
+      //create user divs
       $.each(localUserList, function(i, username){
         thisTwitchViewer.createUserObj(username);
       });
       
+      //initialize timer and request data
+      var timer = setInterval(function(){thisTwitchViewer.updateUserList()}, cooldown);
       thisTwitchViewer.updateUserList();
     }
 
@@ -212,21 +221,20 @@ var TwitchViewer = function(defaultList){
 };
 
 $(document).ready(function(){
-  var defaultList = 'esl_sc2, ogamingsc2, cretetion, freecodecamp, storbeck, habathcx, robotcaleb, noobs2ninjas, brunofin, comster404';
+  var defaultList = 'esl_sc2, ogamingsc2, cretetion, freecodecamp, storbeck, robotcaleb, giantbomb, doublefine, greenspeak, comster404',
+      cooldown = 20000;
   
-  var myTwitchViewer = new TwitchViewer(defaultList);
+  var myTwitchViewer = new TwitchViewer(defaultList, cooldown);
   
   myTwitchViewer.init();
   
-  //toggle online userlist
-  $('#btn-online').on('click', function(e){
-    e.preventDefault();
+  //toggle online userlist caret (prevents rapid clicks)
+  $('#collapse-online').on('hide.bs.collapse show.bs.collapse', function(e){
     $('#caret-online').toggleClass('open');
   });
   
-  //toggle offline userlist
-  $('#btn-offline').on('click', function(e){
-    e.preventDefault();
+  //toggle offline userlist caret (prevents rapid clicks)
+  $('#collapse-offline').on('hide.bs.collapse show.bs.collapse', function(e){
     $('#caret-offline').toggleClass('open');
   });
 
