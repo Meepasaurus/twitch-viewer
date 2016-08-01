@@ -20,17 +20,22 @@ var TwitchViewer = function(defaultList){
 
     createUserObj: function(newUserName){
       var collapser = $('<div class="collapse-user collapse">'), //top-most individual user container
-          userDiv = $('<div class="user-container">');
+          userDiv = $('<div class="user-container">'),
+          userLink = $('<a class="user" target="_blank" rel="noopener noreferrer" href="https://www.twitch.tv/' + newUserName + '">');
 
         //avatar
-        userDiv.append($('<div class="user-logo">')
+        userLink.append($('<div class="user-logo">')
           .append($('<img>')));
         
         //display name - status - game
-        userDiv.append($('<div class="user-text">').append($('<h4 class="display-name"></h4><p class="user-status"></p><p class="user-game"></p>')));
+        userLink.append($('<div class="user-text">')
+          .append($('<h4 class="display-name"></h4><p class="user-status"></p><p class="user-game"></p>')));
+
+        userDiv.append(userLink);
 
         //x icon for user removal
-        userDiv.append($('<div class="user-remove">').append($('<a href="#"><i class="fa fa-times-circle" aria-hidden="true"></i></a>')));
+        userDiv.append($('<div class="user-remove">')
+          .append($('<a class="x" href="#"><i class="fa fa-times-circle" aria-hidden="true"></i></a>')));
         
         //add to userObjs
         collapser.append(userDiv);
@@ -69,9 +74,10 @@ var TwitchViewer = function(defaultList){
       location.reload();
     },
 
-    //updates display data appends div to proper section
+    //updates display data and appends div to proper section
     parseUserData: function(data, isOnline){
       //console.log(data);
+      
       var collapser = $('<div class="collapse-user collapse">'), //top-most individual user container
           userDiv = $('<div class="user-container">'),
           status = '',
@@ -223,7 +229,12 @@ $(document).ready(function(){
     e.preventDefault();
     $('#caret-offline').toggleClass('open');
   });
-  
+
+  //removes focus after clicking a user link
+  $('#collapse-user-list').on('click', 'a.user', function(e){
+    this.blur();
+  });
+
   //remove user from list
   $('#collapse-user-list').on('click', '.user-remove>a', function(e){
     e.preventDefault();

@@ -1,6 +1,7 @@
-$bg-purple: #381675;
-$dark-purple: #6441a4;
+$bg-purple: #6441a4;
+$dark-purple: #381675;
 $dark-gray: #111;
+$x-gray: #aaa;
 $light-gray: #f2f2f2;
 $inset-shadow: inset 0 0 50px 5px #114;
 
@@ -13,20 +14,40 @@ body {
   font-family: 'Open Sans', sans-serif;
   margin: 0 0 20px 0;
   padding: 0;
-  background-color: $dark-purple;
+  background-color: $bg-purple;
 }
 
 a {
-  color: #aaa;
-  text-decoration: none;
   outline: none;
-} 
+  text-decoration: none;
+  
+  &:hover, &:active, &:focus {
+    text-decoration: none;
+    outline: none;
+  }
 
-a:hover, a:active, a:focus {
-  text-decoration: none;
-  outline: none;
-  color: $bg-purple;
-}
+  &.user {
+    width: 100%;
+    display: flex;
+    margin-bottom: 15px;
+    color: $dark-gray;
+    transition: color ease-in-out 0.2s;
+
+    &:hover, &:active, &:focus {
+      color: $bg-purple;
+    }
+  }
+
+  &.x {
+    color: $x-gray;
+    transition: color ease-in-out 0.2s;
+
+    &:hover, &:active, &:focus {
+      color: $dark-purple;
+    }
+  }
+
+} 
 
 h4 {
   font-weight: bold;
@@ -43,7 +64,7 @@ h4 {
 
 .title-image {
   padding: 30px 0;
-  background-color: $dark-purple;
+  background-color: $bg-purple;
 }
 
 .logo {
@@ -59,14 +80,14 @@ h4 {
 }
 
 .form-control:focus {
-  border-color: $dark-purple;
+  border-color: $bg-purple;
   box-shadow: inset 0 1px 1px rgba(0,0,0,.075),0 0 8px rgba(233, 102, 208, 0.6);
 }
 
 .searchbar {
   width: 100%;
   #txt-search {
-    color: $dark-purple;
+    color: $bg-purple;
   }
 }
 
@@ -82,7 +103,7 @@ h4 {
   border-radius: 0;
   .panel-heading {
     padding: 10px;
-    background-color: $bg-purple;
+    background-color: $dark-purple;
     border-radius: 0;
     outline: 0;
     color: white;
@@ -96,23 +117,22 @@ h4 {
 .user-container {
   display: flex;
   width: 100%;
-  min-height: 100px;
   margin: 0;
   padding-top: 10px;
 }
 
 .user-logo {
-  flex: 2 2 50px;
+  flex: 1 1 75px;
   max-width: 75px;
-  min-width: 25px;
+  min-width: 50px;
   img {
     width: 100%;
   }
 }
 
 .user-text {
-  flex: 10 10 300px;
-  margin: 0 0 10px 10px;
+  flex: 1 1 400px;
+  margin: 0 0 0 10px;
   p {
     padding: 0;
     margin: 0;
@@ -148,7 +168,6 @@ footer {
   border: 0;
   height: 10px;
   background-color: $dark-gray;
-  //border-radius: 0 0 10px 10px;
 }
 
 .btn-secondary {
