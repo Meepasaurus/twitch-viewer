@@ -131,9 +131,6 @@ footer {
   display: block;
   outline: none; }
 
-.search-panel-container {
-  display: none; }
-
 @media screen and (max-width: 767px) {
   .panel-container {
     border: none; } }

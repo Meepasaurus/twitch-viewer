@@ -163,8 +163,32 @@ var TwitchViewer = function(defaultList, cooldown){
       $.ajax({
         dataType: 'jsonp',
         url: channelURL,
+        headers: {
+          'Client-ID': 'ijknjytczppohdhsy0zmsukeu4hv2gu'
+        },
         success: function(data){
           thisTwitchViewer.parseUserData(data, false);
+        },
+        error: function(err){
+          console.log(err);
+        }
+      });
+    },
+
+    searchUser: function(username){
+      $.ajax({
+        dataType: 'jsonp',
+        url: 'https://api.twitch.tv/kraken/search/channels?limit=10&q=' + username,
+        headers: {
+          'Client-ID': 'ijknjytczppohdhsy0zmsukeu4hv2gu'
+        },
+        success: function(data){
+          console.log(data);
+          $('#search-results').html('');
+          $.each(data.channels, function(i, channel){
+            $('#search-results').append('<p>' + channel.display_name + '</p>');
+          });
+          $('#collapse-search').collapse('show');
         },
         error: function(err){
           console.log(err);
@@ -182,6 +206,9 @@ var TwitchViewer = function(defaultList, cooldown){
         $.ajax({
           dataType: 'jsonp',
           url: 'https://api.twitch.tv/kraken/streams/' + username,
+          headers: {
+            'Client-ID': 'ijknjytczppohdhsy0zmsukeu4hv2gu'
+          },
           success: function(data){
             if (data.hasOwnProperty('error')){
               //user no longer exists or never did
@@ -212,7 +239,7 @@ var TwitchViewer = function(defaultList, cooldown){
       });
       
       //initialize timer and request data
-      var timer = setInterval(function(){thisTwitchViewer.updateUserList()}, cooldown);
+      var timer = setInterval(function(){thisTwitchViewer.updateUserList();}, cooldown);
       thisTwitchViewer.updateUserList();
     }
 
@@ -247,6 +274,31 @@ $(document).ready(function(){
   $('#collapse-user-list').on('click', '.user-remove>a', function(e){
     e.preventDefault();
     myTwitchViewer.deleteUser(this);
+  });
+
+  $('#txt-search').keypress(function(e){
+    var searchTxt = $('#txt-search').val();
+    if(searchTxt !== ''){
+      //presses enter
+      if (e.keyCode == 13) {
+        myTwitchViewer.searchUser(searchTxt);
+        return false;
+      }
+    }
+  });
+
+  //close search
+  $('#search-close').on('click', function(e){
+    $('#collapse-search').collapse('hide');
+  });
+
+  //note needs to be keydown instead of press to work in Chrome
+  $(document).keydown(function(e){
+    //presses esc
+    if (e.keyCode == 27) {
+      $('#collapse-search').collapse('hide');
+      return false;
+    }
   });
   
   //reset to demo userlist

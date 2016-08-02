@@ -4,6 +4,6 @@
         "localStorage": false,
         "document": false,
         "console": false,
-        "location": false;
+        "location": false
     }
 }
