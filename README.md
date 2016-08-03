@@ -10,6 +10,4 @@ Unminified CodePen version: http://codepen.io/Meepasaurus/full/RRryaB/
 
 Todo
 ----
--alphabetically sort online and offline lists
-
 -search

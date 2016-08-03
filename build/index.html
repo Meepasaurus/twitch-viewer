@@ -25,6 +25,9 @@
 	      <div class="search-bar-container col-xs-12 col-sm-10 col-sm-offset-1 col-md-8 col-md-offset-2 col-lg-6 col-lg-offset-3">
 	        <div class="input-group searchbar">
 	          <input id="txt-search" type="text" class="form-control" placeholder="Search to add users...">
+	          <span class="input-group-btn">
+	        		<button id="btn-search" class="btn btn-search" type="button"><span class="fa fa-search" aria-hidden="true"></span></button>
+	      		</span>
 	        </div>
 	      </div>
 	    </div>
@@ -46,47 +49,56 @@
 			</section>
 		</div>
 
- 		<section class="online-container">
-      <div class="row">
-        <div class="panel-container col-xs-12 col-sm-10 col-sm-offset-1 col-md-8 col-md-offset-2 col-lg-6 col-lg-offset-3">
-          <div class="panel panel-default">
-            <a id="btn-online" role="button" data-toggle="collapse" href="#collapse-online" aria-expanded="true" aria-controls="collapse-online">
-              <div class="panel-heading" role="tab" id="heading-online">
-                <h4 class="panel-title"><i id="caret-online" class="fa fa-caret-down fa-fw" aria-hidden="true"></i> Online</h4>
-              </div>
-            </a>
-            <div id="collapse-online" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading-online">
-              <div id="users-online" class="panel-body">
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
+		<div class="row">
+			<section id="collapse-users" class="collapse col-xs-12">
+		 		<section class="online-container">
+		      <div class="row">
+		        <div class="panel-container col-xs-12 col-sm-10 col-sm-offset-1 col-md-8 col-md-offset-2 col-lg-6 col-lg-offset-3">
+		          <div class="panel panel-default">
+		            <a id="btn-online" role="button" data-toggle="collapse" href="#collapse-online" aria-expanded="true" aria-controls="collapse-online">
+		              <div class="panel-heading" role="tab" id="heading-online">
+		                <h4 class="panel-title"><i id="caret-online" class="fa fa-caret-down fa-fw" aria-hidden="true"></i> Online</h4>
+		              </div>
+		            </a>
+		            <div id="collapse-online" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading-online">
+		              <div id="users-online" class="panel-body">
+		              </div>
+		            </div>
+		          </div>
+		        </div>
+		      </div>
+		    </section>
 
-    <section class="offline-container">
-      <div class="row">
-        <div class="panel-container col-xs-12 col-sm-10 col-sm-offset-1 col-md-8 col-md-offset-2 col-lg-6 col-lg-offset-3">
-          <div class="panel panel-default">
-            <a id="btn-offline" role="button" data-toggle="collapse" href="#collapse-offline" aria-expanded="true" aria-controls="collapse-offline">
-              <div class="panel-heading" role="tab" id="heading-offline">
-                <h4 class="panel-title"><i id="caret-offline" class="fa fa-caret-down fa-fw" aria-hidden="true"></i> Offline</h4>
-              </div>
-            </a>
-            <div id="collapse-offline" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading-offline">
-              <div id="users-offline" class="panel-body">
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-	    
+		    <section class="offline-container">
+		      <div class="row">
+		        <div class="panel-container col-xs-12 col-sm-10 col-sm-offset-1 col-md-8 col-md-offset-2 col-lg-6 col-lg-offset-3">
+		          <div class="panel panel-default">
+		            <a id="btn-offline" role="button" data-toggle="collapse" href="#collapse-offline" aria-expanded="true" aria-controls="collapse-offline">
+		              <div class="panel-heading" role="tab" id="heading-offline">
+		                <h4 class="panel-title"><i id="caret-offline" class="fa fa-caret-down fa-fw" aria-hidden="true"></i> Offline</h4>
+		              </div>
+		            </a>
+		            <div id="collapse-offline" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading-offline">
+		              <div id="users-offline" class="panel-body">
+		              </div>
+		            </div>
+		          </div>
+		        </div>
+		      </div>
+		    </section>
+	  	</section>
+	  </div>
+
 	  <div class="row">
 	    <footer class="col-xs-12 col-sm-10 col-sm-offset-1 col-md-8 col-md-offset-2 col-lg-6 col-lg-offset-3">
 	    </footer>
 	  </div>
 	  
+	  <div class="loader">
+					<i class="fa fa-spinner fa-spin fa-3x fa-fw"></i>
+					<span class="sr-only">Loading...</span>
+		</div>
+
 	  <button id="btn-reset" class="btn btn-secondary">Reset Demo List</button>
 	</main>
 	<script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>

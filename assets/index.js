@@ -3,7 +3,8 @@
 var TwitchViewer = function(defaultList, cooldown){
 
   var localUserList = [],
-      userObjs = {};
+      userObjs = {},
+      initCounter = 0;
 
   //check for saved user list
   if (localStorage.hasOwnProperty('userList')){
@@ -15,6 +16,8 @@ var TwitchViewer = function(defaultList, cooldown){
     localStorage.setItem('userList', defaultList);
     localUserList = defaultList.split(", ");
   }
+
+  initCounter = localUserList.length;
 
   return {
 
@@ -78,12 +81,25 @@ var TwitchViewer = function(defaultList, cooldown){
       location.reload();
     },
 
+    //sort online or offline list alphabetically, modified from jsfiddle user hibbard_eu
+    sortUsers: function(isOnline){
+      var container = isOnline? '#users-online' : '#users-offline',
+          divs = $(container + ' .collapse-user');
+
+      var sortedDivs = divs.sort(function (a, b) {
+          return $(a).find("h4").text().toLowerCase() > $(b).find("h4").text().toLowerCase();
+        });
+      
+      $(container).append(sortedDivs);
+    },
+
     //updates display data and appends div to proper section
-    parseUserData: function(data, isOnline){
+    parseUserData: function(data, isOnline, err){
       //console.log(data);
       
       var channelLogo = '',
           channelName = '',
+          displayName = '',
           thisUserObj = {},
           collapser = null,
           status = '',
@@ -93,6 +109,7 @@ var TwitchViewer = function(defaultList, cooldown){
       if (isOnline){
         //console.log(data);
 
+        displayName = data.stream.channel.display_name;
         channelLogo = data.stream.channel.logo;
         channelName = data.stream.channel.name;
         thisUserObj = userObjs[channelName];
@@ -102,6 +119,7 @@ var TwitchViewer = function(defaultList, cooldown){
 
         //if user has changed to online status
         if (thisUserObj.isOnline === false){
+          console.log('Switching user ' + displayName + ' to Online list.');
           collapser.collapse('hide');
           //reminder as before, do not use .on hidden.bs.collapse
           setTimeout(function(){
@@ -110,26 +128,30 @@ var TwitchViewer = function(defaultList, cooldown){
         }
 
         //avatar
-        thisUserObj.logo.attr({'src': channelLogo, 'alt': channelName + ' avatar'});
+        thisUserObj.logo.attr({'src': channelLogo, 'alt': displayName + ' avatar'});
         
         //display name - status - game
         status = data.stream.channel.status || '';
         game = data.stream.game ? 'Streaming: ' + data.stream.game : '';
         viewers = data.stream.viewers ? data.stream.viewers + ' viewers' : 0;
 
-        thisUserObj.displayName.text(data.stream.channel.display_name);
+        thisUserObj.displayName.text(displayName);
         thisUserObj.status.text(status);
         thisUserObj.game.text(game + ' - ' + viewers);
 
         //append to DOM if it isn't currently
         if (thisUserObj.isOnline === null || thisUserObj.isOnline === false){
+          console.log('Added user ' + displayName + ' to Online list.');
           thisUserObj.isOnline = true;
-          $('#users-online').append(thisUserObj.collapser);
-          thisUserObj.collapser.collapse('show');
+          $('#users-online').append(collapser);
+          //sort here
+          this.sortUsers(true);
+          collapser.collapse('show');
         }
       } else if (isOnline === false) {
         //console.log(data);
 
+        displayName = data.display_name;
         channelLogo = data.logo;
         channelName = data.name;
         thisUserObj = userObjs[channelName];
@@ -137,6 +159,7 @@ var TwitchViewer = function(defaultList, cooldown){
 
         //if user has changed to offline status
         if (thisUserObj.isOnline === true){
+          console.log('Switching user ' + channelName + ' to Offline list.');
           collapser.collapse('hide');
           //reminder as before, do not use .on hidden.bs.collapse
           setTimeout(function(){
@@ -145,20 +168,23 @@ var TwitchViewer = function(defaultList, cooldown){
         }
 
         //avatar
-        thisUserObj.logo.attr({'src': channelLogo, 'alt': channelName + ' avatar'});
+        thisUserObj.logo.attr({'src': channelLogo, 'alt': displayName + ' avatar'});
         
         //display name - status
         status = data.status || '';
 
-        thisUserObj.displayName.text(data.display_name);
+        thisUserObj.displayName.text(displayName);
         thisUserObj.status.text(status);        
         thisUserObj.game.text('');
 
         //append to DOM if it isn't currently
         if(thisUserObj.isOnline === null || thisUserObj.isOnline === true){
+          console.log('Added user ' + displayName + ' to Offline list.');
           thisUserObj.isOnline = false;
-          $('#users-offline').append(thisUserObj.collapser);
-          thisUserObj.collapser.collapse('show');
+          $('#users-offline').append(collapser);
+          //sort here
+          this.sortUsers(false);
+          collapser.collapse('show');
         }
       } else {
         //user does not currently exist
@@ -167,6 +193,7 @@ var TwitchViewer = function(defaultList, cooldown){
 
         //if user's account no longer accessible
         if (thisUserObj.isOnline === true){
+          console.log('Switching user ' + data + ' to Offline list.');
           collapser.collapse('hide');
           //reminder as before, do not use .on hidden.bs.collapse
           setTimeout(function(){
@@ -181,16 +208,33 @@ var TwitchViewer = function(defaultList, cooldown){
         status = data.status || '';
 
         thisUserObj.displayName.text(data);
-        thisUserObj.status.html('<p class="null-status">This user no longer exists.</p>');        
+        
+        if (err === 503){
+          thisUserObj.status.html('<p class="null-status">Twitch server is currently unavailable. Please refresh or wait 20 seconds.</p>');        
+        } else {
+          thisUserObj.status.html('<p class="null-status">This user no longer exists.</p>');        
+        }
+
         thisUserObj.game.text('');
 
         //append to DOM if it isn't currently
         if(thisUserObj.isOnline === null || thisUserObj.isOnline === true){
+          console.log('Added user ' + data + ' to Offline list.');
           thisUserObj.isOnline = false;
-          $('#users-offline').append(thisUserObj.collapser);
-          thisUserObj.collapser.collapse('show');
+          $('#users-offline').append(collapser);
+          //sort here
+          this.sortUsers(false);
+          collapser.collapse('show');
         }
       }
+      //add slight delay o smoothly display info
+      if (initCounter === 1){
+        setTimeout(function(){
+          $('.loader').fadeOut();
+          $('#collapse-users').collapse('show');
+        }, 500);
+      }
+      initCounter--;
     },
 
     getOfflineUser: function(channelURL){
@@ -203,7 +247,7 @@ var TwitchViewer = function(defaultList, cooldown){
           'Client-ID': 'ijknjytczppohdhsy0zmsukeu4hv2gu'
         },
         success: function(data){
-          thisTwitchViewer.parseUserData(data, false);
+          thisTwitchViewer.parseUserData(data, false, null);
         },
         error: function(err){
           console.log(err);
@@ -247,15 +291,21 @@ var TwitchViewer = function(defaultList, cooldown){
           },
           success: function(data){
             if (data.hasOwnProperty('error')){
-              //user no longer exists or never did
-              thisTwitchViewer.parseUserData(username, null);
+              console.log(data);
+              if(data.status === 503){
+                //twitch server is unavailable
+                thisTwitchViewer.parseUserData(username, null, 503);
+              } else {
+                //user no longer exists or never did
+                thisTwitchViewer.parseUserData(username, null, null);
+              }
             } else {
               if (data.stream === null){
                 //channel is offline, need to request channel data
                 thisTwitchViewer.getOfflineUser(data._links.channel);
               } else {
                 //parse channel info
-                thisTwitchViewer.parseUserData(data, true);
+                thisTwitchViewer.parseUserData(data, true, null);
               }
             }
           },
@@ -284,7 +334,7 @@ var TwitchViewer = function(defaultList, cooldown){
 };
 
 $(document).ready(function(){
-  var defaultList = 'esl_sc2, ogamingsc2, cretetion, freecodecamp, patrickklepek, robotcaleb, giantbomb, doublefine, greenspeak, comster404',
+  var defaultList = 'esl_sc2, ogamingsc2, freecodecamp, patrickklepek, giantbomb, doublefine, greenspeak, comster404',
       cooldown = 20000;
   
   var myTwitchViewer = new TwitchViewer(defaultList, cooldown);
@@ -330,6 +380,15 @@ $(document).ready(function(){
     }
   });
 
+  //search button
+  $('.btn-search').on('click', function(e){
+    this.blur();
+    var searchTxt = $('#txt-search').val();
+    if(searchTxt !== ''){
+      myTwitchViewer.searchUser(searchTxt);
+    }
+  });
+
   //close search
   $('#search-close').on('click', function(e){
     $('#collapse-search').collapse('hide');
@@ -343,6 +402,13 @@ $(document).ready(function(){
       $('#collapse-search').collapse('hide');
       $('#txt-search').val('');
       return false;
+    }
+  });
+
+  //TESTING PURPOSES - presses a
+  $(document).keydown(function(e){
+    if (e.keyCode == 65) {
+      //add whatever here
     }
   });
   
