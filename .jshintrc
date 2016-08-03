@@ -4,6 +4,8 @@
         "localStorage": false,
         "document": false,
         "console": false,
-        "location": false
+        "location": false,
+        "setTimeout" : false,
+        "setInterval" : false
     }
 }

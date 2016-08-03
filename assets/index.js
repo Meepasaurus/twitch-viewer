@@ -82,8 +82,10 @@ var TwitchViewer = function(defaultList, cooldown){
     parseUserData: function(data, isOnline){
       //console.log(data);
       
-      var collapser = $('<div class="collapse-user collapse">'), //top-most individual user container
-          userDiv = $('<div class="user-container">'),
+      var channelLogo = '',
+          channelName = '',
+          thisUserObj = {},
+          collapser = null,
           status = '',
           game = '',
           viewers = 0;
@@ -91,9 +93,21 @@ var TwitchViewer = function(defaultList, cooldown){
       if (isOnline){
         //console.log(data);
 
-        var channelLogo = data.stream.channel.logo,
-            channelName = data.stream.channel.name,
-            thisUserObj = userObjs[channelName];
+        channelLogo = data.stream.channel.logo;
+        channelName = data.stream.channel.name;
+        thisUserObj = userObjs[channelName];
+        collapser = thisUserObj.collapser;
+        game = '';
+        viewers = 0;
+
+        //if user has changed to online status
+        if (thisUserObj.isOnline === false){
+          collapser.collapse('hide');
+          //reminder as before, do not use .on hidden.bs.collapse
+          setTimeout(function(){
+            $(collapser).remove();
+          }, 5000);
+        }
 
         //avatar
         thisUserObj.logo.attr({'src': channelLogo, 'alt': channelName + ' avatar'});
@@ -107,8 +121,8 @@ var TwitchViewer = function(defaultList, cooldown){
         thisUserObj.status.text(status);
         thisUserObj.game.text(game + ' - ' + viewers);
 
-        //append to DOM if it isn't already
-        if(thisUserObj.isOnline === null){
+        //append to DOM if it isn't currently
+        if (thisUserObj.isOnline === null || thisUserObj.isOnline === false){
           thisUserObj.isOnline = true;
           $('#users-online').append(thisUserObj.collapser);
           thisUserObj.collapser.collapse('show');
@@ -116,9 +130,19 @@ var TwitchViewer = function(defaultList, cooldown){
       } else if (isOnline === false) {
         //console.log(data);
 
-        var channelLogo = data.logo,
-            channelName = data.name,
-            thisUserObj = userObjs[channelName];
+        channelLogo = data.logo;
+        channelName = data.name;
+        thisUserObj = userObjs[channelName];
+        collapser = thisUserObj.collapser;
+
+        //if user has changed to offline status
+        if (thisUserObj.isOnline === true){
+          collapser.collapse('hide');
+          //reminder as before, do not use .on hidden.bs.collapse
+          setTimeout(function(){
+            $(collapser).remove();
+          }, 5000);
+        }
 
         //avatar
         thisUserObj.logo.attr({'src': channelLogo, 'alt': channelName + ' avatar'});
@@ -128,16 +152,27 @@ var TwitchViewer = function(defaultList, cooldown){
 
         thisUserObj.displayName.text(data.display_name);
         thisUserObj.status.text(status);        
-        
-        //append to DOM if it isn't already
-        if(thisUserObj.isOnline === null){
+        thisUserObj.game.text('');
+
+        //append to DOM if it isn't currently
+        if(thisUserObj.isOnline === null || thisUserObj.isOnline === true){
           thisUserObj.isOnline = false;
           $('#users-offline').append(thisUserObj.collapser);
           thisUserObj.collapser.collapse('show');
         }
       } else {
         //user does not currently exist
-        var thisUserObj = userObjs[data];
+        thisUserObj = userObjs[data];
+        collapser = thisUserObj.collapser;
+
+        //if user's account no longer accessible
+        if (thisUserObj.isOnline === true){
+          collapser.collapse('hide');
+          //reminder as before, do not use .on hidden.bs.collapse
+          setTimeout(function(){
+            $(collapser).remove();
+          }, 5000);
+        }
 
         //avatar
         thisUserObj.logo.attr({'src': 'images/default_avatar.png', 'alt': 'default avatar'});
@@ -147,9 +182,10 @@ var TwitchViewer = function(defaultList, cooldown){
 
         thisUserObj.displayName.text(data);
         thisUserObj.status.html('<p class="null-status">This user no longer exists.</p>');        
-        
-        //append to DOM if it isn't already
-        if(thisUserObj.isOnline === null){
+        thisUserObj.game.text('');
+
+        //append to DOM if it isn't currently
+        if(thisUserObj.isOnline === null || thisUserObj.isOnline === true){
           thisUserObj.isOnline = false;
           $('#users-offline').append(thisUserObj.collapser);
           thisUserObj.collapser.collapse('show');
@@ -248,7 +284,7 @@ var TwitchViewer = function(defaultList, cooldown){
 };
 
 $(document).ready(function(){
-  var defaultList = 'esl_sc2, ogamingsc2, cretetion, freecodecamp, storbeck, robotcaleb, giantbomb, doublefine, greenspeak, comster404',
+  var defaultList = 'esl_sc2, ogamingsc2, cretetion, freecodecamp, patrickklepek, robotcaleb, giantbomb, doublefine, greenspeak, comster404',
       cooldown = 20000;
   
   var myTwitchViewer = new TwitchViewer(defaultList, cooldown);
@@ -257,29 +293,36 @@ $(document).ready(function(){
   
   //toggle online userlist caret (prevents rapid clicks)
   $('#collapse-online').on('hide.bs.collapse show.bs.collapse', function(e){
+    //prevents children triggering event
+    if (e.target !== this){
+      return;
+    }
     $('#caret-online').toggleClass('open');
   });
   
   //toggle offline userlist caret (prevents rapid clicks)
   $('#collapse-offline').on('hide.bs.collapse show.bs.collapse', function(e){
+    if (e.target !== this){
+      return;
+    }
     $('#caret-offline').toggleClass('open');
   });
 
   //removes focus after clicking a user link
-  $('#collapse-user-list').on('click', 'a.user', function(e){
+  $('.wrapper').on('click', 'a.user', function(e){
     this.blur();
   });
 
   //remove user from list
-  $('#collapse-user-list').on('click', '.user-remove>a', function(e){
+  $('.wrapper').on('click', '.user-remove>a', function(e){
     e.preventDefault();
     myTwitchViewer.deleteUser(this);
   });
 
+  //presses enter in search
   $('#txt-search').keypress(function(e){
     var searchTxt = $('#txt-search').val();
     if(searchTxt !== ''){
-      //presses enter
       if (e.keyCode == 13) {
         myTwitchViewer.searchUser(searchTxt);
         return false;
@@ -292,11 +335,13 @@ $(document).ready(function(){
     $('#collapse-search').collapse('hide');
   });
 
-  //note needs to be keydown instead of press to work in Chrome
+
+  //presses esc
   $(document).keydown(function(e){
-    //presses esc
+    //note needs to be keydown instead of press to work in Chrome
     if (e.keyCode == 27) {
       $('#collapse-search').collapse('hide');
+      $('#txt-search').val('');
       return false;
     }
   });

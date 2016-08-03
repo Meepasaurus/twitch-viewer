@@ -12,6 +12,4 @@ Todo
 ----
 -alphabetically sort online and offline lists
 
--add cases for when users switch between online and offline
-
 -search
