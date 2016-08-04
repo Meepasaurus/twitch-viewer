@@ -299,14 +299,10 @@ var TwitchViewer = function(defaultList, cooldown){
           userLink = $('<a class="user" target="_blank" rel="noopener noreferrer" href="https://www.twitch.tv/' + data.name + '">'),
           userName = data.display_name,
           userLogo = data.logo || 'images/default_avatar.png',
-          userStatus = data.status || '',
-          //find what size other user logos are currently set as to avoid content shifting
-          imageSize = $('#collapse-users').find('.user-logo').width() + 'px';
-
-      //console.log(imageSize);
+          userStatus = data.status || '';
 
       //avatar
-      userLink.append($('<div class="user-logo" style="height:' + imageSize + '; width:' + imageSize + '">')
+      userLink.append($('<div class="user-logo" style="height:75px; width:75px">')
           .append($('<img src="' + userLogo + '" alt="' + userName + ' avatar">')));
 
       //display name - status - game
