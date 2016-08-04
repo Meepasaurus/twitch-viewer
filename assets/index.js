@@ -10,6 +10,10 @@ var TwitchViewer = function(defaultList, cooldown){
   if (localStorage.hasOwnProperty('userList')){
     //console.log('Found Local List');
     localUserList = localStorage.getItem('userList').split(', ');
+    //check for empty list
+    if (localUserList[0] === ''){
+      localUserList = [];
+    }
     //console.log(localUserList);
   } else {
     //console.log('Initializing List');
@@ -427,7 +431,15 @@ var TwitchViewer = function(defaultList, cooldown){
       $.each(localUserList, function(i, username){
         thisTwitchViewer.createUserObj(username);
       });
+
+      //console.log(localUserList);
       
+      //get rid of loader if list is empty
+      if (localUserList.length === 0){
+        $('.loader').fadeOut();
+        $('#collapse-users').collapse('show');
+      }
+
       //initialize timer and request data
       var timer = setInterval(function(){thisTwitchViewer.updateUserList();}, cooldown);
       thisTwitchViewer.updateUserList();
