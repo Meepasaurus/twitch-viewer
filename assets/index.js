@@ -26,7 +26,7 @@ var TwitchViewer = function(defaultList, cooldown){
   return {
 
     createUserObj: function(newUserName){
-      var collapser = $('<li class="collapse-user collapse">'), //top-most individual user container
+      var collapser = $('<div class="collapse-user collapse">'), //top-most individual user container
           userDiv = $('<div class="user-container">'),
           userLink = $('<a class="user" target="_blank" rel="noopener noreferrer" href="https://www.twitch.tv/' + newUserName + '">');
 
@@ -295,7 +295,7 @@ var TwitchViewer = function(defaultList, cooldown){
 
     parseSearch: function(data){
       //these are disposable so do not use createUserObj
-      var userDiv = $('<li class="user-container">'),
+      var userDiv = $('<div class="user-container">'),
           userLink = $('<a class="user" target="_blank" rel="noopener noreferrer" href="https://www.twitch.tv/' + data.name + '">'),
           userName = data.display_name,
           userLogo = data.logo || 'images/default_avatar.png',
