@@ -17,6 +17,10 @@ body {
   background-color: $bg-purple;
 }
 
+ul {
+  margin: 0;
+}
+
 a {
   outline: none;
   text-decoration: none;
@@ -92,6 +96,12 @@ h4 {
   }
 }
 
+.no-results {
+  margin-top: 10px;
+  color: darkred;
+  font-style: italic;
+}
+
 .panel-container {
   padding: 0;
   border-left: 10px solid $dark-gray;
@@ -156,7 +166,7 @@ h4 {
   margin-bottom: 10px;
 }
 
-.user-remove {
+.user-remove, .user-add {
   flex: 1 1 30px;
   margin-top: -8px;
   font-size: 28px;
@@ -169,7 +179,6 @@ h4 {
   margin: 0 auto;
   color: white;
   font-size: 14px;
-  letter-spacing: normal;
   text-align: center;
 }
 

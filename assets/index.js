@@ -8,13 +8,13 @@ var TwitchViewer = function(defaultList, cooldown){
 
   //check for saved user list
   if (localStorage.hasOwnProperty('userList')){
-    console.log("Found Local List");
-    localUserList = localStorage.getItem('userList').split(", ");
-    console.log(localUserList);
+    //console.log('Found Local List');
+    localUserList = localStorage.getItem('userList').split(', ');
+    //console.log(localUserList);
   } else {
-    console.log("Initializing List");
+    //console.log('Initializing List');
     localStorage.setItem('userList', defaultList);
-    localUserList = defaultList.split(", ");
+    localUserList = defaultList.split(', ');
   }
 
   initCounter = localUserList.length;
@@ -22,7 +22,7 @@ var TwitchViewer = function(defaultList, cooldown){
   return {
 
     createUserObj: function(newUserName){
-      var collapser = $('<div class="collapse-user collapse">'), //top-most individual user container
+      var collapser = $('<li class="collapse-user collapse">'), //top-most individual user container
           userDiv = $('<div class="user-container">'),
           userLink = $('<a class="user" target="_blank" rel="noopener noreferrer" href="https://www.twitch.tv/' + newUserName + '">');
 
@@ -52,6 +52,21 @@ var TwitchViewer = function(defaultList, cooldown){
         };
     },
 
+    addUser: function(userAddLink){
+      $('#collapse-search').collapse('hide');
+      $('#txt-search').val('');
+      var addUserName = $(userAddLink).closest('.user-container').find('h4').html().toLowerCase();
+      
+      //prevent rapid clicking
+      if (localUserList.indexOf(addUserName) === -1){
+        localUserList.push(addUserName);
+        //console.log(localUserList);
+        localStorage.setItem('userList', localUserList.join(', '));
+        this.createUserObj(addUserName);
+        this.updateUserList();
+      }
+    },
+
     deleteUser: function(userRemoveLink){
       var deleteUser = $(userRemoveLink).closest('.collapse-user'),
           deleteUserName = $(userRemoveLink).closest('.user-container').find('h4').html().toLowerCase(),
@@ -64,7 +79,7 @@ var TwitchViewer = function(defaultList, cooldown){
         delete userObjs[deleteUserName];
 
         //update localStorage
-        localStorage.setItem('userList', localUserList.join(", "));
+        localStorage.setItem('userList', localUserList.join(', '));
         deleteUser.collapse('hide');
         
         //remove from DOM, note not using .on hidden.bs.collapse event because users will be hidden when moving containers between online and offline lists
@@ -97,7 +112,8 @@ var TwitchViewer = function(defaultList, cooldown){
     parseUserData: function(data, isOnline, err){
       //console.log(data);
       
-      var channelLogo = '',
+      var thisTwitchViewer = this,
+          channelLogo = '',
           channelName = '',
           displayName = '',
           thisUserObj = {},
@@ -110,7 +126,7 @@ var TwitchViewer = function(defaultList, cooldown){
         //console.log(data);
 
         displayName = data.stream.channel.display_name;
-        channelLogo = data.stream.channel.logo;
+        channelLogo = data.stream.channel.logo || 'images/default_avatar.png';
         channelName = data.stream.channel.name;
         thisUserObj = userObjs[channelName];
         collapser = thisUserObj.collapser;
@@ -119,12 +135,18 @@ var TwitchViewer = function(defaultList, cooldown){
 
         //if user has changed to online status
         if (thisUserObj.isOnline === false){
-          console.log('Switching user ' + displayName + ' to Online list.');
+          //console.log('Switching user ' + displayName + ' to Online list.');
           collapser.collapse('hide');
           //reminder as before, do not use .on hidden.bs.collapse
           setTimeout(function(){
             $(collapser).remove();
-          }, 5000);
+            //console.log('Added user ' + displayName + ' to Online list.');
+            thisUserObj.isOnline = true;
+            $('#users-online').append(collapser);
+            //sort here
+            thisTwitchViewer.sortUsers(true);
+            collapser.collapse('show');
+          }, 1000);
         }
 
         //avatar
@@ -140,31 +162,37 @@ var TwitchViewer = function(defaultList, cooldown){
         thisUserObj.game.text(game + ' - ' + viewers);
 
         //append to DOM if it isn't currently
-        if (thisUserObj.isOnline === null || thisUserObj.isOnline === false){
-          console.log('Added user ' + displayName + ' to Online list.');
+        if (thisUserObj.isOnline === null){
+          //console.log('Added user ' + displayName + ' to Online list.');
           thisUserObj.isOnline = true;
           $('#users-online').append(collapser);
           //sort here
-          this.sortUsers(true);
+          thisTwitchViewer.sortUsers(true);
           collapser.collapse('show');
         }
       } else if (isOnline === false) {
         //console.log(data);
 
         displayName = data.display_name;
-        channelLogo = data.logo;
+        channelLogo = data.logo || 'images/default_avatar.png';
         channelName = data.name;
         thisUserObj = userObjs[channelName];
         collapser = thisUserObj.collapser;
 
         //if user has changed to offline status
         if (thisUserObj.isOnline === true){
-          console.log('Switching user ' + channelName + ' to Offline list.');
+          //console.log('Switching user ' + channelName + ' to Offline list.');
           collapser.collapse('hide');
           //reminder as before, do not use .on hidden.bs.collapse
           setTimeout(function(){
             $(collapser).remove();
-          }, 5000);
+            //console.log('Added user ' + displayName + ' to Offline list.');
+            thisUserObj.isOnline = false;
+            $('#users-offline').append(collapser);
+            //sort here
+            thisTwitchViewer.sortUsers(false);
+            collapser.collapse('show');
+          }, 1000);
         }
 
         //avatar
@@ -178,12 +206,12 @@ var TwitchViewer = function(defaultList, cooldown){
         thisUserObj.game.text('');
 
         //append to DOM if it isn't currently
-        if(thisUserObj.isOnline === null || thisUserObj.isOnline === true){
-          console.log('Added user ' + displayName + ' to Offline list.');
+        if(thisUserObj.isOnline === null){
+          //console.log('Added user ' + displayName + ' to Offline list.');
           thisUserObj.isOnline = false;
           $('#users-offline').append(collapser);
           //sort here
-          this.sortUsers(false);
+          thisTwitchViewer.sortUsers(false);
           collapser.collapse('show');
         }
       } else {
@@ -193,16 +221,22 @@ var TwitchViewer = function(defaultList, cooldown){
 
         //if user's account no longer accessible
         if (thisUserObj.isOnline === true){
-          console.log('Switching user ' + data + ' to Offline list.');
+          //console.log('Switching user ' + data + ' to Offline list.');
           collapser.collapse('hide');
           //reminder as before, do not use .on hidden.bs.collapse
           setTimeout(function(){
             $(collapser).remove();
-          }, 5000);
+            //console.log('Added user ' + data + ' to Offline list.');
+            thisUserObj.isOnline = false;
+            $('#users-offline').append(collapser);
+            //sort here
+            thisTwitchViewer.sortUsers(false);
+            collapser.collapse('show');
+          }, 1000);
         }
 
         //avatar
-        thisUserObj.logo.attr({'src': 'images/default_avatar.png', 'alt': 'default avatar'});
+        thisUserObj.logo.attr({'src': 'images/default_avatar.png', 'alt': data + ' avatar'});
         
         //display name - status
         status = data.status || '';
@@ -218,12 +252,12 @@ var TwitchViewer = function(defaultList, cooldown){
         thisUserObj.game.text('');
 
         //append to DOM if it isn't currently
-        if(thisUserObj.isOnline === null || thisUserObj.isOnline === true){
-          console.log('Added user ' + data + ' to Offline list.');
+        if(thisUserObj.isOnline === null){
+          //console.log('Added user ' + data + ' to Offline list.');
           thisUserObj.isOnline = false;
           $('#users-offline').append(collapser);
           //sort here
-          this.sortUsers(false);
+          thisTwitchViewer.sortUsers(false);
           collapser.collapse('show');
         }
       }
@@ -255,7 +289,68 @@ var TwitchViewer = function(defaultList, cooldown){
       });
     },
 
+    parseSearch: function(data){
+      //these are disposable so do not use createUserObj
+      var userDiv = $('<li class="user-container">'),
+          userLink = $('<a class="user" target="_blank" rel="noopener noreferrer" href="https://www.twitch.tv/' + data.name + '">'),
+          userName = data.display_name,
+          userLogo = data.logo || 'images/default_avatar.png',
+          userStatus = data.status || '',
+          //find what size other user logos are currently set as to avoid content shifting
+          imageSize = $('#collapse-users').find('.user-logo').width() + 'px';
+
+      //console.log(imageSize);
+
+      //avatar
+      userLink.append($('<div class="user-logo" style="height:' + imageSize + '; width:' + imageSize + '">')
+          .append($('<img src="' + userLogo + '" alt="' + userName + ' avatar">')));
+
+      //display name - status - game
+      userLink.append($('<div class="user-text">')
+        .append($('<h4 class="display-name">' + userName + '</h4><p class="user-status">' + userStatus + '</p><p class="user-game"></p>')));
+
+      userDiv.append(userLink);
+
+      //+ icon for adding to userList
+      if (localUserList.indexOf(data.name) === -1){
+        userDiv.append($('<div class="user-add">')
+          .append($('<a class="x" href="#"><i class="fa fa-plus-circle" aria-hidden="true"></i></a>')));
+      } else {
+        userDiv.append($<'<div class="user-add">');
+      }
+      $('#search-results').append(userDiv);
+
+      //check if user is online
+      $.ajax({
+          dataType: 'jsonp',
+          url: 'https://api.twitch.tv/kraken/streams/' + data.name,
+          headers: {
+            'Client-ID': 'ijknjytczppohdhsy0zmsukeu4hv2gu'
+          },
+          success: function(data){
+            if (data.hasOwnProperty('error')){
+              //console.log('');
+            } else {
+              if (data.stream !== null){
+                //console.log(data.stream);
+                var game = data.stream.game ? 'Streaming: ' + data.stream.game : '',
+                    viewers = data.stream.viewers ? data.stream.viewers + ' viewers' : 0;
+                userLink.find($(".user-game")).text(game + ' - ' + viewers);
+              } else {
+                //console.log('');
+              }
+            }
+          },
+          error: function(err){
+            console.log(err); 
+          }
+        });
+
+    },
+
     searchUser: function(username){
+      var thisTwitchViewer = this;
+
       $.ajax({
         dataType: 'jsonp',
         url: 'https://api.twitch.tv/kraken/search/channels?limit=10&q=' + username,
@@ -263,12 +358,21 @@ var TwitchViewer = function(defaultList, cooldown){
           'Client-ID': 'ijknjytczppohdhsy0zmsukeu4hv2gu'
         },
         success: function(data){
-          console.log(data);
+          //console.log(data);
+
           $('#search-results').html('');
-          $.each(data.channels, function(i, channel){
-            $('#search-results').append('<p>' + channel.display_name + '</p>');
-          });
-          $('#collapse-search').collapse('show');
+          if (data.channels.length !== 0){
+            $.each(data.channels, function(i, channel){
+              thisTwitchViewer.parseSearch(channel);
+            });
+          } else {
+            $('#search-results').append($('<p class="no-results">No results found.</p>'));
+          }
+
+          //add tiny delay otherwise empty search won't show
+          setTimeout(function(){
+            $('#collapse-search').collapse('show');  
+          }, 100);
         },
         error: function(err){
           console.log(err);
@@ -277,7 +381,7 @@ var TwitchViewer = function(defaultList, cooldown){
     },
 
     updateUserList: function(){
-      console.log('UPDATING...');
+      //console.log('UPDATING...');
 
       var thisTwitchViewer = this;
       
@@ -291,7 +395,7 @@ var TwitchViewer = function(defaultList, cooldown){
           },
           success: function(data){
             if (data.hasOwnProperty('error')){
-              console.log(data);
+              //console.log(data);
               if(data.status === 503){
                 //twitch server is unavailable
                 thisTwitchViewer.parseUserData(username, null, 503);
@@ -374,6 +478,7 @@ $(document).ready(function(){
     var searchTxt = $('#txt-search').val();
     if(searchTxt !== ''){
       if (e.keyCode == 13) {
+        $('#collapse-search').collapse('hide');
         myTwitchViewer.searchUser(searchTxt);
         return false;
       }
@@ -385,15 +490,22 @@ $(document).ready(function(){
     this.blur();
     var searchTxt = $('#txt-search').val();
     if(searchTxt !== ''){
+      $('#collapse-search').collapse('hide');
       myTwitchViewer.searchUser(searchTxt);
     }
   });
 
-  //close search
-  $('#search-close').on('click', function(e){
-    $('#collapse-search').collapse('hide');
+  //add user to list
+  $('.wrapper').on('click', '.user-add>a', function(e){
+    e.preventDefault();
+    myTwitchViewer.addUser(this);
   });
 
+  //close search button
+  $('#search-close').on('click', function(e){
+    $('#collapse-search').collapse('hide');
+    $('#txt-search').val('');
+  });
 
   //presses esc
   $(document).keydown(function(e){
@@ -402,13 +514,6 @@ $(document).ready(function(){
       $('#collapse-search').collapse('hide');
       $('#txt-search').val('');
       return false;
-    }
-  });
-
-  //TESTING PURPOSES - presses a
-  $(document).keydown(function(e){
-    if (e.keyCode == 65) {
-      //add whatever here
     }
   });
   
